@@ -1,0 +1,538 @@
+<!doctype html>
+html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>3D Birthday Cake with Premium Melting Cream - Alisha</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #ee9ca7;
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .text {
+      position: absolute;
+      top: 72%;
+      width: 100%;
+      text-align: center;
+      color: #8b6a60;
+      font-style: italic;
+      font-weight: 300;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .text h1 {
+      font-size: 2.2em;
+      margin: 0;
+    }
+    .text p {
+      font-size: 1.4em;
+      margin: 5px 0 0 0;
+    }
+  </style>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Lato:300italic"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div class="text">
+    <h1>Happy 2 Years Together 🫶</h1>
+  </div>
+  <script>
+    // --- KHỞI TẠO KHÔNG GIAN 3D ---
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xee9ca7);
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000,
+    );
+    camera.position.set(0, 12, 28);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2;
+    // --- ÁNH SÁNG ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+    const candleLight = new THREE.PointLight(0xffaa44, 0, 15);
+    scene.add(candleLight);
+    // --- KHỞI TẠO CAKE GROUP ---
+    const cakeGroup = new THREE.Group();
+    scene.add(cakeGroup);
+    // Chất liệu màu sắc
+    const cakeMat = new THREE.MeshStandardMaterial({
+      color: 0xa88679,
+      roughness: 0.5,
+      metalness: 0.1,
+    });
+    const chocoMat = new THREE.MeshStandardMaterial({
+      color: 0x8b6a60,
+      roughness: 0.3,
+      metalness: 0.1,
+    });
+    const creamMat = new THREE.MeshStandardMaterial({
+      color: 0xfefae9,
+      roughness: 0.2,
+      metalness: 0.1,
+    }); // Giảm roughness để kem bóng bẩy hơn
+    const plateMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.2,
+    });
+    const candleMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.4,
+    });
+    const flameMat = new THREE.MeshBasicMaterial({ color: 0xfeeb61 });
+    // 1. Đĩa
+    const plateGeo = new THREE.CylinderGeometry(7.5, 8, 0.2, 32);
+    const plate = new THREE.Mesh(plateGeo, plateMat);
+    cakeGroup.add(plate);
+    // 2. Tầng bánh 1 (Dưới cùng)
+    const layer1Geo = new THREE.CylinderGeometry(5.5, 5.5, 1.8, 32);
+    const layer1 = new THREE.Mesh(layer1Geo, cakeMat);
+    cakeGroup.add(layer1);
+    // Giọt kem Sô-cô-la 1
+    const drop1Geo = new THREE.SphereGeometry(0.35, 16, 16);
+    const drop1 = new THREE.Mesh(drop1Geo, chocoMat);
+    cakeGroup.add(drop1);
+    // Lớp kem Sô-cô-la 1
+    const fudge1Geo = new THREE.CylinderGeometry(5.55, 5.55, 0.3, 32);
+    const fudge1 = new THREE.Mesh(fudge1Geo, chocoMat);
+    cakeGroup.add(fudge1);
+    // 3. Tầng bánh 2 (Giữa)
+    const layer2Geo = new THREE.CylinderGeometry(4.2, 4.2, 1.6, 32);
+    const layer2 = new THREE.Mesh(layer2Geo, cakeMat);
+    cakeGroup.add(layer2);
+    // Giọt kem Sô-cô-la 2
+    const drop2Geo = new THREE.SphereGeometry(0.3, 16, 16);
+    const drop2 = new THREE.Mesh(drop2Geo, chocoMat);
+    cakeGroup.add(drop2);
+    // Lớp kem Sô-cô-la 2
+    const fudge2Geo = new THREE.CylinderGeometry(4.25, 4.25, 0.3, 32);
+    const fudge2 = new THREE.Mesh(fudge2Geo, chocoMat);
+    cakeGroup.add(fudge2);
+    // 4. Tầng bánh 3 (Trên cùng)
+    const layer3Geo = new THREE.CylinderGeometry(2.8, 2.8, 1.4, 32);
+    const layer3 = new THREE.Mesh(layer3Geo, cakeMat);
+    cakeGroup.add(layer3);
+    // Giọt kem Vani phủ đỉnh
+    const drop3Geo = new THREE.SphereGeometry(0.25, 16, 16);
+    const drop3 = new THREE.Mesh(drop3Geo, creamMat);
+    cakeGroup.add(drop3);
+    // Lớp kem Vani lan phủ đỉnh bánh
+    const creamGeo = new THREE.CylinderGeometry(2.85, 2.85, 0.4, 32);
+    const cream = new THREE.Mesh(creamGeo, creamMat);
+    cakeGroup.add(cream);
+    // ==========================================
+    // KHU VỰC TẠO HIỆU ỨNG KEM CHẢY ĐỒ HỌA (NEW 🌟)
+    // ==========================================
+    const dripsGroup = new THREE.Group();
+    cream.add(dripsGroup); // Add vào cream để nở ra cùng lớp kem phẳng
+    const numDrips = 12; // Số lượng giọt kem chảy quanh viền bánh
+    const dripMeshes = [];
+    for (let i = 0; i < numDrips; i++) {
+      const angle = (i / numDrips) * Math.PI * 2;
+      const dripLength = 0.5 + Math.random() * 0.7; // Độ dài ngắn ngẫu nhiên cho tự nhiên
+      const dripRadius = 0.12 + Math.random() * 0.05; // Độ béo ngẫu nhiên
+      const singleDripGroup = new THREE.Group();
+      // Thân giọt chảy (Hình trụ)
+      const dripBodyGeo = new THREE.CylinderGeometry(
+        dripRadius,
+        dripRadius,
+        dripLength,
+        16,
+      );
+      dripBodyGeo.translate(0, -dripLength / 2, 0); // Di chuyển tâm lên đỉnh để khi scale Y nó sẽ vuốt xuống dưới
+      const dripBody = new THREE.Mesh(dripBodyGeo, creamMat);
+      singleDripGroup.add(dripBody);
+      // Đầu giọt nước tròn trịa bên dưới (Hình cầu)
+      const dripBottomGeo = new THREE.SphereGeometry(dripRadius * 1.15, 16, 16);
+      const dripBottom = new THREE.Mesh(dripBottomGeo, creamMat);
+      dripBottom.position.y = -dripLength;
+      singleDripGroup.add(dripBottom);
+      // Đặt vị trí giọt chảy bám sát viền ngoài của tầng bánh trên cùng
+      singleDripGroup.position.set(
+        Math.cos(angle) * 2.82,
+        -0.15, // Đặt ngay dưới đáy của lớp kem phủ
+        Math.sin(angle) * 2.82,
+      );
+      // Ban đầu ép chiều dọc về 0 để giấu đi
+      singleDripGroup.scale.y = 0;
+      dripsGroup.add(singleDripGroup);
+      dripMeshes.push(singleDripGroup);
+    }
+    // ==========================================
+    // Hạt kem trang trí viền quanh đỉnh (giữ lại một ít hạt nhỏ làm điểm nhấn)
+    const creamDrops = new THREE.Group();
+    for (let i = 0; i < 8; i++) {
+      const angle = ((i + 0.5) / 8) * Math.PI * 2;
+      const dropGeo = new THREE.SphereGeometry(0.15, 16, 16);
+      const d = new THREE.Mesh(dropGeo, creamMat);
+      d.position.set(Math.cos(angle) * 2.65, 0.1, Math.sin(angle) * 2.65);
+      creamDrops.add(d);
+    }
+    cream.add(creamDrops);
+    // 5. Cây nến
+    const candleGeo = new THREE.CylinderGeometry(0.15, 0.15, 2.2, 16);
+    const candle = new THREE.Mesh(candleGeo, candleMat);
+    const candleStripeGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.3, 16);
+    const candleStripeMat = new THREE.MeshStandardMaterial({
+      color: 0xff5555,
+    });
+    const stripe1 = new THREE.Mesh(candleStripeGeo, candleStripeMat);
+    stripe1.position.y = 0.4;
+    const stripe2 = new THREE.Mesh(candleStripeGeo, candleStripeMat);
+    stripe2.position.y = -0.4;
+    candle.add(stripe1, stripe2);
+    cakeGroup.add(candle);
+    // 6. Ngọn lửa
+    const flameGeo = new THREE.ConeGeometry(0.2, 0.7, 16);
+    flameGeo.translate(0, 0.35, 0);
+    const flame = new THREE.Mesh(flameGeo, flameMat);
+    flame.visible = false;
+    cakeGroup.add(flame);
+    // --- THIẾT LẬP TỌA ĐỘ Y VÀ TRẠNG THÁI ẨN BAN ĐẦU ---
+    const targetY = {
+      layer1: 0.9,
+      fudge1: 1.95,
+      layer2: 2.9,
+      fudge2: 3.85,
+      layer3: 4.7,
+      cream: 5.5,
+      candle: 6.7,
+      flame: 7.8,
+    };
+    layer1.position.y = 40;
+    layer2.position.y = 40;
+    layer3.position.y = 40;
+    candle.position.y = 50;
+    drop1.position.set(0, 12, 0);
+    drop1.scale.set(0, 0, 0);
+    drop2.position.set(0, 14, 0);
+    drop2.scale.set(0, 0, 0);
+    drop3.position.set(0, 16, 0);
+    drop3.scale.set(0, 0, 0);
+    fudge1.position.y = targetY.fudge1;
+    fudge1.scale.set(0, 1, 0);
+    fudge2.position.y = targetY.fudge2;
+    fudge2.scale.set(0, 1, 0);
+    cream.position.y = targetY.cream;
+    cream.scale.set(0, 0, 0);
+    flame.position.set(0, targetY.flame, 0);
+    candleLight.position.set(0, targetY.flame, 0);
+    // --- CHUỖI HOẠT HÌNH TIMELINE (CẬP NHẬT HIỆU ỨNG CHẢY KEM) ---
+    const tl = gsap.timeline();
+    // [Giây 0.5]: Tầng bánh đáy rơi xuống
+    tl.to(
+      layer1.position,
+      { y: targetY.layer1, duration: 0.8, ease: "bounce.out" },
+      0.5,
+    );
+    // [Giây 1.3]: Giọt kem sô-cô-la 1 rơi
+    tl.to(drop1.scale, { x: 1, y: 1, z: 1, duration: 0.1 }, 1.3);
+    tl.to(
+      drop1.position,
+      { y: targetY.fudge1, duration: 0.3, ease: "power1.in" },
+      1.4,
+    );
+    tl.to(drop1.scale, { x: 0, y: 0, z: 0, duration: 0.1 }, 1.7);
+    tl.to(fudge1.scale, { x: 1, z: 1, duration: 0.5, ease: "power2.out" }, 1.7);
+    // [Giây 2.2]: Tầng bánh thứ 2 rơi
+    tl.to(
+      layer2.position,
+      { y: targetY.layer2, duration: 0.5, ease: "bounce.out" },
+      2.2,
+    );
+    // [Giây 2.7]: Giọt kem sô-cô-la 2 rơi
+    tl.to(drop2.scale, { x: 1, y: 1, z: 1, duration: 0.1 }, 2.7);
+    tl.to(
+      drop2.position,
+      { y: targetY.fudge2, duration: 0.3, ease: "power1.in" },
+      2.8,
+    );
+    tl.to(drop2.scale, { x: 0, y: 0, z: 0, duration: 0.1 }, 3.1);
+    tl.to(fudge2.scale, { x: 1, z: 1, duration: 0.5, ease: "power2.out" }, 3.1);
+    // [Giây 3.6]: Tầng bánh trên cùng rơi
+    tl.to(
+      layer3.position,
+      { y: targetY.layer3, duration: 0.3, ease: "bounce.out" },
+      3.6,
+    );
+    // [Giây 3.9]: Giọt kem vani xuất hiện lao xuống
+    tl.to(drop3.scale, { x: 1, y: 1, z: 1, duration: 0.1 }, 3.9);
+    tl.to(
+      drop3.position,
+      { y: targetY.cream, duration: 0.4, ease: "power1.in" },
+      4.0,
+    );
+    tl.to(drop3.scale, { x: 0, y: 0, z: 0, duration: 0.1 }, 4.4);
+    // [Giây 4.4]: Lớp kem đỉnh bắt đầu nở bung rộng ra bằng hiệu ứng đàn hồi
+    tl.to(
+      cream.scale,
+      { x: 1, y: 1, z: 1, duration: 1.2, ease: "elastic.out(1, 0.75)" },
+      4.4,
+    );
+    // [Giây 4.8]: Khi kem chính lan ra sát mép, kích hoạt chuỗi giọt chảy vuốt dọc xuống thân bánh so le nhau cực mượt
+    dripMeshes.forEach((drip, index) => {
+      tl.to(
+        drip.scale,
+        {
+          y: 1,
+          duration: 0.7 + Math.random() * 0.5, // Thời gian chảy ngẫu nhiên từng giọt
+          ease: "power2.out",
+        },
+        4.8 + index * 0.04,
+      ); // Mỗi giọt chảy lệch nhau 0.04s (Stagger effect)
+    });
+    // [Giây 6.0]: Cây nến cắm xuống (Lùi lại một chút để nhường spotlight cho kem chảy)
+    tl.to(
+      candle.position,
+      { y: targetY.candle, duration: 0.5, ease: "back.out(1.5)" },
+      6.0,
+    );
+    // [Giây 6.5]: Bùng lửa bập bùng
+    tl.call(
+      () => {
+        flame.visible = true;
+        flame.scale.set(0, 0, 0);
+        gsap.to(flame.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.25,
+          ease: "back.out(2)",
+        });
+        gsap.to(candleLight, { intensity: 1.2, duration: 0.3 });
+      },
+      null,
+      6.5,
+    );
+    // --- VÒNG LẶP RENDER ---
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+      if (time > 0.5) {
+        cakeGroup.rotation.y = time * 0.15;
+      }
+      if (flame.visible) {
+        flame.scale.y =
+          1 + Math.sin(time * 22) * 0.12 + Math.cos(time * 38) * 0.06;
+        flame.scale.x = 1 + Math.sin(time * 28) * 0.08;
+        flame.scale.z = 1 + Math.sin(time * 28) * 0.08;
+        candleLight.intensity = 1.0 + Math.random() * 0.3;
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+  <script>
+    const clickSound = new Audio("./mouseclick.mp3");
+    const cutSound = new Audio("./quick_vegetable_slice_3.mp3");
+    // --- 1. SETUP UI (Nút + Note) ---
+    const cutBtn = document.createElement("button");
+    cutBtn.innerText = "Cắt Bánh!";
+    Object.assign(cutBtn.style, {
+      position: "absolute",
+      bottom: "40px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      padding: "15px 30px",
+      fontSize: "20px",
+      cursor: "pointer",
+      zIndex: "100",
+      background: "#ff6b81",
+      border: "none",
+      borderRadius: "30px",
+      color: "#fff",
+      fontWeight: "bold",
+      display: "none",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+    });
+    document.body.appendChild(cutBtn);
+    const note = document.createElement("div");
+    note.id = "note"; // Đặt ID để dễ chỉnh CSS
+    note.innerText = "Quay nhẹ đĩa bánh trước khi cắt";
+    Object.assign(note.style, {
+      position: "absolute",
+      bottom: "100px",
+      width: "100%",
+      textAlign: "center",
+      color: "#fff",
+      fontSize: "20px",
+      fontWeight: "bold",
+      display: "none",
+      textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+      zIndex: "100",
+      pointerEvents: "none",
+    });
+    document.body.appendChild(note);
+    tl.eventCallback("onComplete", () => {
+      cutBtn.style.display = "block";
+      note.style.display = "block";
+    });
+    // --- 2. RESPONSIVE (Tự co giãn khi xoay màn hình) ---
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    // --- 3. HÀM TẠO DAO ---
+    function createKnife() {
+      const knife = new THREE.Group();
+      const bladeGeo = new THREE.BoxGeometry(0.3, 0.5, 8);
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: 0xe0e0e0,
+        metalness: 0.9,
+        roughness: 0.1,
+      });
+      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      blade.position.z = -1;
+      knife.add(blade);
+      const handleGeo = new THREE.BoxGeometry(0.6, 0.6, 2);
+      const handleMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+      const handle = new THREE.Mesh(handleGeo, handleMat);
+      handle.position.z = 4;
+      knife.add(handle);
+      knife.position.set(0, 15, 0);
+      return knife;
+    }
+    // --- 4. HÀM CẮT BÁNH ---
+    cutBtn.onclick = () => {
+      clickSound.currentTime = 0; // Reset âm thanh về 0 để bấm nhiều lần vẫn kêu
+      clickSound.play();
+      cutBtn.style.display = "none";
+      note.style.display = "none";
+      const knife = createKnife();
+      scene.add(knife);
+      const knifeTl = gsap.timeline({
+        onComplete: () => {
+          scene.remove(knife);
+          performSplit();
+        },
+      });
+      knifeTl
+        .call(() => {
+          setTimeout(() => {
+            cutSound.currentTime = 0; // Reset âm thanh
+          cutSound.play();
+          },500);
+        })
+        .to(knife.position, { y: 0, duration: 1.0, ease: "power2.in" })
+        .to({}, { duration: 0.5 })
+        .to(knife.position, { y: 15, duration: 0.5, ease: "power2.out" });
+      function performSplit() {
+        cakeGroup.children.forEach((child) => {
+          if (child !== plate) {
+            child.visible = false;
+          }
+        });
+        const leftGroup = new THREE.Group();
+        const rightGroup = new THREE.Group();
+        scene.add(leftGroup, rightGroup);
+        const fillingMat = new THREE.MeshStandardMaterial({
+          color: 0xfff0e0,
+          side: THREE.DoubleSide,
+        });
+        function addHalf(radius, height, mat, y, side) {
+          const group = new THREE.Group();
+          const start = side === "left" ? 0 : Math.PI;
+          const geo = new THREE.CylinderGeometry(
+            radius,
+            radius,
+            height,
+            32,
+            1,
+            false,
+            start,
+            Math.PI,
+          );
+          const cakeMesh = new THREE.Mesh(geo, mat);
+          cakeMesh.position.y = y;
+          group.add(cakeMesh);
+          const planeGeo = new THREE.PlaneGeometry(radius * 2, height);
+          const planeMesh = new THREE.Mesh(planeGeo, fillingMat);
+          planeMesh.position.y = y;
+          planeMesh.rotation.y = Math.PI / 2;
+          group.add(planeMesh);
+          return group;
+        }
+        const components = [
+          { r: 5.5, h: 1.8, mat: cakeMat, y: targetY.layer1 },
+          { r: 4.2, h: 1.6, mat: cakeMat, y: targetY.layer2 },
+          { r: 2.8, h: 1.4, mat: cakeMat, y: targetY.layer3 },
+          { r: 5.55, h: 0.3, mat: chocoMat, y: targetY.fudge1 },
+          { r: 4.25, h: 0.3, mat: chocoMat, y: targetY.fudge2 },
+          { r: 2.85, h: 0.4, mat: creamMat, y: targetY.cream },
+        ];
+        components.forEach((c) => {
+          leftGroup.add(addHalf(c.r, c.h, c.mat, c.y, "left"));
+          rightGroup.add(addHalf(c.r, c.h, c.mat, c.y, "right"));
+        });
+        gsap.to(leftGroup.position, {
+          x: 4,
+          duration: 1.5,
+          ease: "power2.out",
+        });
+        gsap.to(rightGroup.position, {
+          x: -4,
+          duration: 1.5,
+          ease: "power2.out",
+        });
+        gsap.to(camera.position, {
+          x: 0,
+          y: 5,
+          z: 6,
+          duration: 1.5,
+          onUpdate: () => controls.update(),
+        });
+        setTimeout(() => {
+          window.location.href = "./album.html";
+        }, 1200);
+      }
+    };
+  </script>
+</body>
+/html>

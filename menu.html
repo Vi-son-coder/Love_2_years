@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Menu Quà Tặng</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght=600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #ffdce6;
+        background-image:
+          linear-gradient(
+            45deg,
+            #ffcce0 25%,
+            transparent 25%,
+            transparent 75%,
+            #ffcce0 75%,
+            #ffcce0
+          ),
+          linear-gradient(
+            45deg,
+            #ffcce0 25%,
+            transparent 25%,
+            transparent 75%,
+            #ffcce0 75%,
+            #ffcce0
+          );
+        background-position:
+          0 0,
+          20px 20px;
+        background-size: 40px 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 5vw;
+        font-family: "Arial", sans-serif;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      .menu-card {
+        background-color: rgba(255, 255, 255, 0.3);
+        width: 90%;
+        max-width: 600px;
+        padding: 6vw;
+        margin-bottom: 5vw;
+        border-radius: 8vw;
+        box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(8px);
+        border: 0.5vw solid rgba(255, 255, 255, 0.3);
+        z-index: 2;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .menu-card:hover {
+        transform: scale(1.05);
+      }
+
+      .menu-card:active {
+        transform: scale(0.95);
+        background-color: rgba(255, 255, 255, 0.5);
+      }
+
+      .icon {
+        font-size: 15vw;
+        margin-bottom: 2vw;
+        color: #ff4d6d;
+      }
+
+      .label {
+        color: #ff4d6d;
+        font-weight: bold;
+        font-size: 6vw;
+      }
+
+      /* --- MODAL MUSIC PLAYER --- */
+      #music-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        backdrop-filter: blur(8px);
+      }
+
+      .modal-content {
+        background: #ffe9ef;
+        width: 90%;
+        max-width: 350px;
+        padding: 25px;
+        border-radius: 40px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(255, 77, 109, 0.2);
+      }
+
+      .close-modal {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        top: 20px;
+        right: 25px;
+        font-size: 20px;
+        cursor: pointer;
+        color: white;
+        border-radius: 50%;
+        background-color: #ff4d6d;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #ffccd5;
+        border-radius: 3px;
+        margin: 20px 0;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: #ff4d6d;
+        border-radius: 3px;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .btn-ctrl {
+        font-size: 30px;
+        color: #ff4d6d;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .btn-play {
+        width: 70px;
+        height: 70px;
+        background: #ff4d6d !important;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #ffffff !important;
+        font-size: 30px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(255, 77, 109, 0.3);
+        margin: 0 20px;
+        border: none;
+        outline: none;
+        user-select: none;
+        line-height: 1;
+        text-align: center;
+        padding-left: 2px;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .track-list {
+        text-align: left;
+        max-height: 180px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 5px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .track-list::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .track-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      .track-list::-webkit-scrollbar-thumb {
+        background: #ffccd5;
+        border-radius: 10px;
+      }
+
+      .track-list:hover::-webkit-scrollbar-thumb {
+        background: #ff4d6d;
+      }
+
+      .track-item {
+        padding: 12px 15px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        color: #ff4d6d;
+        font-weight: bold;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition:
+          background 0.2s ease,
+          color 0.2s ease;
+      }
+
+      .track-item:hover {
+        background: rgba(255, 77, 109, 0.1);
+      }
+
+      /* --- ANIMATIONS --- */
+      .heart-float {
+        position: absolute;
+        color: #ff4d6d;
+        opacity: 0;
+        font-size: 6vw;
+        animation: float 2s ease-out;
+        pointer-events: none;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(-10vh) translateX(5vw) scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      .bg-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .float-icon {
+        position: absolute;
+        font-size: 8vw;
+        opacity: 0.3;
+        animation: moveUp linear infinite;
+      }
+
+      @keyframes moveUp {
+        0% {
+          transform: translateY(100vh);
+        }
+        100% {
+          transform: translateY(-10vh);
+        }
+      }
+
+      /* --- NỀN MODAL BỨC THƯ --- */
+      .letter-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .letter-card {
+        background: #eae1e8;
+        width: 100%;
+        max-width: 350px;
+        min-height: 480px;
+        padding: 15px;
+        border-radius: 40px;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
+        border: 8px solid #c6b5c8;
+      }
+
+      .letter-inner {
+        width: 100%;
+        height: 100%;
+        min-height: 450px;
+        border-radius: 28px;
+        border: 2px dashed #f09cdf;
+        padding: 40px 22px 20px 25px;
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .close-letter {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 32px;
+        height: 32px;
+        background-color: #ff3366;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(255, 51, 102, 0.3);
+        z-index: 10;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .letter-text-box {
+        font-family: "Dancing Script", Arial, sans-serif;
+        font-size: 26px;
+        color: #56434e;
+        line-height: 1.8;
+        text-align: left;
+        margin-top: 15px;
+        padding-bottom: 90px;
+        max-height: 350px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      .letter-text-box::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .letter-text-box::-webkit-scrollbar-thumb {
+        background: #ffccd5;
+        border-radius: 10px;
+      }
+
+      .letter-text-box:hover::-webkit-scrollbar-thumb {
+        background: #ff4d6d;
+      }
+
+      .cute-rabbit-img {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        width: 80px;
+        height: auto;
+        z-index: 9999;
+        pointer-events: none;
+        display: block !important;
+      }
+
+      .letter-line {
+        margin: 0 0 20px 0;
+        min-height: 32px;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 2px;
+        background-color: #ff4d6d;
+        animation: blink 0.7s infinite;
+        margin-left: 2px;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-container" id="bg-container"></div>
+
+    <div class="menu-card" onclick="openMusic()">
+      <div class="icon">🎵</div>
+      <div class="label">Music</div>
+    </div>
+
+    <div
+      class="menu-card"
+      onclick="
+        createHearts(this);
+        openLetter();
+      "
+    >
+      <div class="icon">💌</div>
+      <div class="label">Letter</div>
+    </div>
+
+    <div class="menu-card" onclick="window.location.href = './cake.html';">
+      <div class="icon">🎁</div>
+      <div class="label">Gift</div>
+    </div>
+
+    <div id="music-modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeMusic()">✕</span>
+        <div style="font-weight: bold; color: #ff4d6d; margin-bottom: 10px">
+          🎵 MUSIC PLAYER
+        </div>
+        <img
+          src="./IMG_MUSIC.JPG"
+          style="
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+          "
+        />
+        <h2 id="current-title" style="color: #ff4d6d; margin: 15px 0">
+          Chọn bài hát
+        </h2>
+        <div class="progress-bar" onclick="seek(event)">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            color: #ff4d6d;
+            font-size: 12px;
+            font-weight: bold;
+          "
+        >
+          <span id="curr-time">0:00</span>
+          <span id="total-time">0:00</span>
+        </div>
+        <div class="controls">
+          <div class="btn-ctrl" onclick="prevTrack()">⏮</div>
+          <div class="btn-play" id="play-pause-btn" onclick="togglePlay()">
+            ▶
+          </div>
+          <div class="btn-ctrl" onclick="nextTrack()">⏭</div>
+        </div>
+        <div class="track-list" id="track-list">
+          <div
+            class="track-item"
+            data-src="./mongyu.mp3"
+            data-title="MỘNG YU"
+            onclick="selectTrack(0)"
+          >
+            🎵 MỘNG YU
+          </div>
+          <div
+            class="track-item"
+            data-src="./aingoaianh.mp3"
+            data-title="Ai Ngoài Anh"
+            onclick="selectTrack(1)"
+          >
+            🎵 Ai Ngoài Anh
+          </div>
+          <div
+            class="track-item"
+            data-src="./nguoidautien.mp3"
+            data-title="NGƯỜI ĐẦU TIÊN"
+            onclick="selectTrack(2)"
+          >
+            🎵 NGƯỜI ĐẦU TIÊN
+          </div>
+          <div
+            class="track-item"
+            data-src="./khongbuong.mp3"
+            data-title="Không Buông"
+            onclick="selectTrack(3)"
+          >
+            🎵 Không Buông
+          </div>
+          <div
+            class="track-item"
+            data-src="./canginoiyeu.mp3"
+            data-title="CẦN GÌ NÓI IU"
+            onclick="selectTrack(4)"
+          >
+            🎵 CẦN GÌ NÓI IU
+          </div>
+        </div>
+        <audio id="audio-player"></audio>
+      </div>
+    </div>
+
+    <div id="letter-modal" class="letter-overlay">
+      <div class="letter-card">
+        <div class="letter-inner">
+          <span class="close-letter" onclick="closeLetter()">✕</span>
+          <div class="letter-text-box" id="letter-container"></div>
+          <svg
+            class="cute-rabbit-img"
+            viewBox="0 0 100 100"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g transform="translate(0,5)">
+              <ellipse cx="50" cy="60" rx="28" ry="24" fill="#ffccd5" />
+              <ellipse
+                cx="38"
+                cy="32"
+                rx="8"
+                ry="22"
+                fill="#ffccd5"
+                transform="rotate(-10 38 32)"
+              />
+              <ellipse
+                cx="38"
+                cy="32"
+                rx="4"
+                ry="15"
+                fill="#ffb3c1"
+                transform="rotate(-10 38 32)"
+              />
+              <ellipse
+                cx="62"
+                cy="32"
+                rx="8"
+                ry="22"
+                fill="#ffccd5"
+                transform="rotate(10 62 32)"
+              />
+              <ellipse
+                cx="62"
+                cy="32"
+                rx="4"
+                ry="15"
+                fill="#ffb3c1"
+                transform="rotate(10 62 32)"
+              />
+              <ellipse cx="50" cy="58" rx="24" ry="19" fill="#ffffff" />
+              <circle cx="42" cy="52" r="3.5" fill="#4a3b42" />
+              <circle cx="58" cy="52" r="3.5" fill="#4a3b42" />
+              <ellipse
+                cx="36"
+                cy="57"
+                rx="5"
+                ry="3"
+                fill="#ff85a1"
+                opacity="0.6"
+              />
+              <ellipse
+                cx="64"
+                cy="57"
+                rx="5"
+                ry="3"
+                fill="#ff85a1"
+                opacity="0.6"
+              />
+              <polygon points="48,58 52,58 50,61" fill="#4a3b42" />
+              <path
+                d="M47,64 Q50,67 53,64"
+                fill="none"
+                stroke="#4a3b42"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+              <rect
+                x="44"
+                y="68"
+                width="12"
+                height="18"
+                rx="3"
+                fill="#4cc9f0"
+              />
+              <circle cx="50" cy="83" r="1.5" fill="#ffffff" />
+              <ellipse cx="32" cy="72" rx="6" ry="5" fill="#ffccd5" />
+              <ellipse cx="68" cy="72" rx="6" ry="5" fill="#ffccd5" />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function createHearts(card) {
+        for (let i = 0; i < 5; i++) {
+          const heart = document.createElement("span");
+          heart.innerText = "❤️";
+          heart.classList.add("heart-float");
+          heart.style.left = Math.random() * 80 + 10 + "%";
+          heart.style.top = "50%";
+          card.appendChild(heart);
+          setTimeout(() => heart.remove(), 2000);
+        }
+      }
+
+      const bgContainer = document.getElementById("bg-container");
+      const icons = ["🌸", "🎀", "🧸", "✨", "💕"];
+      function spawnBgIcon() {
+        const span = document.createElement("span");
+        span.classList.add("float-icon");
+        span.innerText = icons[Math.floor(Math.random() * icons.length)];
+        span.style.left = Math.random() * 100 + "%";
+        span.style.animationDuration = Math.random() * 5 + 7 + "s";
+        bgContainer.appendChild(span);
+        setTimeout(() => span.remove(), 12000);
+      }
+      setInterval(spawnBgIcon, 2000);
+
+      // --- LOGIC PLAYER NHẠC ---
+      const audio = document.getElementById("audio-player");
+      const playBtn = document.getElementById("play-pause-btn");
+      const progressFill = document.getElementById("progress-fill");
+      let currentTrackIndex = -1;
+
+      function openMusic() {
+        document.getElementById("music-modal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeMusic() {
+        document.getElementById("music-modal").style.display = "none";
+        document.body.style.overflow = "";
+        audio.pause();
+        playBtn.innerText = "▶";
+      }
+
+      function selectTrack(index) {
+        const items = document.querySelectorAll(".track-item");
+        if (index < 0 || index >= items.length) return;
+
+        currentTrackIndex = index;
+        const item = items[index];
+        const url = item.getAttribute("data-src");
+        const title = item.getAttribute("data-title");
+
+        if (url) {
+          audio.src = url;
+          document.getElementById("current-title").innerText = title;
+        }
+
+        items.forEach((i) => {
+          i.style.background = "rgba(255, 255, 255, 0.5)";
+          i.style.color = "#ff4d6d";
+        });
+        item.style.background = "rgba(255, 77, 109, 0.25)";
+
+        audio.play();
+        playBtn.innerText = "⏸";
+      }
+
+      function togglePlay() {
+        if (currentTrackIndex === -1) {
+          selectTrack(0);
+          return;
+        }
+
+        if (audio.paused) {
+          audio.play();
+          playBtn.innerText = "⏸";
+        } else {
+          audio.pause();
+          playBtn.innerText = "▶";
+        }
+      }
+
+      function nextTrack() {
+        const items = document.querySelectorAll(".track-item");
+        if (items.length === 0) return;
+        let nextIndex = (currentTrackIndex + 1) % items.length;
+        selectTrack(nextIndex);
+      }
+
+      function prevTrack() {
+        const items = document.querySelectorAll(".track-item");
+        if (items.length === 0) return;
+        let prevIndex = (currentTrackIndex - 1 + items.length) % items.length;
+        selectTrack(prevIndex);
+      }
+
+      audio.onended = () => {
+        nextTrack();
+      };
+
+      audio.ontimeupdate = () => {
+        if (audio.duration) {
+          const progress = (audio.currentTime / audio.duration) * 100;
+          progressFill.style.width = progress + "%";
+          document.getElementById("curr-time").innerText = formatTime(
+            audio.currentTime,
+          );
+          document.getElementById("total-time").innerText = formatTime(
+            audio.duration,
+          );
+        }
+      };
+
+      function formatTime(s) {
+        let m = Math.floor(s / 60);
+        let sec = Math.floor(s % 60);
+        return m + ":" + (sec < 10 ? "0" : "") + sec;
+      }
+
+      function seek(e) {
+        if (!audio.duration) return;
+        const progressBar = document.querySelector(".progress-bar");
+        const rect = progressBar.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const percent = clickX / rect.width;
+        audio.currentTime = percent * audio.duration;
+      }
+
+      const letterContents = [
+        "Gửi tình yêu của đời anh,",
+        "Chúc mừng kỷ niệm 2 năm chúng mình bên nhau.",
+        "730 ngày qua, cảm ơn vì đã luôn ở bên cạnh anh.",
+        "Mỗi khoảnh khắc mình cùng nhau đều là kỷ niệm đẹp nhất.",
+        "Hy vọng rằng chúng ta sẽ còn thật nhiều năm nữa,",
+        "Được cùng nhau già đi, em nhé! ❤️",
+      ];
+
+      let currentLine = 0;
+      let currentChar = 0;
+      let timeoutId = null;
+
+      function typeEffect() {
+        if (currentLine < letterContents.length) {
+          const currentLineEl = document.getElementById(`line-${currentLine}`);
+          const textStr = letterContents[currentLine];
+
+          if (currentChar < textStr.length) {
+            const oldCursor = currentLineEl.querySelector(".cursor");
+            if (oldCursor) oldCursor.remove();
+
+            currentLineEl.innerHTML +=
+              textStr.charAt(currentChar) + '<span class="cursor">|</span>';
+            currentChar++;
+            timeoutId = setTimeout(typeEffect, 80);
+          } else {
+            const finalCursor = currentLineEl.querySelector(".cursor");
+            if (finalCursor) finalCursor.remove();
+            currentLine++;
+            currentChar = 0;
+            timeoutId = setTimeout(typeEffect, 500);
+          }
+        }
+      }
+
+      function openLetter() {
+        document.getElementById("letter-modal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+
+        const container = document.getElementById("letter-container");
+        container.innerHTML = "";
+        letterContents.forEach((_, i) => {
+          const div = document.createElement("div");
+          div.id = `line-${i}`;
+          div.className = "letter-line";
+          container.appendChild(div);
+        });
+
+        clearTimeout(timeoutId);
+        currentLine = 0;
+        currentChar = 0;
+        setTimeout(typeEffect, 200);
+      }
+
+      function closeLetter() {
+        document.getElementById("letter-modal").style.display = "none";
+        document.body.style.overflow = "";
+        clearTimeout(timeoutId);
+      }
+    </script>
+  </body>
+</html>

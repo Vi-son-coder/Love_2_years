@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vòng Xoay Ảnh 3D Neon</title>
+    <link rel="stylesheet" href="./album.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  </head>
+  <body>
+    <div id="countdown-timer">Chuyển trang sau: 15s</div>
+
+    <svg class="neon-heart-svg" viewBox="-50 -50 600 600">
+      <defs>
+        <filter
+          id="neonGlowMegaWide"
+          x="-200%"
+          y="-200%"
+          width="500%"
+          height="500%"
+        >
+          <feGaussianBlur stdDeviation="2" result="core" />
+          <feGaussianBlur stdDeviation="6" result="mid" />
+          <feGaussianBlur stdDeviation="15" result="big" />
+          <feGaussianBlur stdDeviation="30" result="wide" />
+          <feMerge>
+            <feMergeNode in="wide" />
+            <feMergeNode in="big" />
+            <feMergeNode in="mid" />
+            <feMergeNode in="core" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <path
+        class="heart-base-black"
+        d="M250,120 C250,120 200,30 120,30 C50,30 0,85 0,155 C0,245 90,315 250,450 C410,315 500,245 500,155 C500,85 450,30 380,30 C300,30 250,120 250,120 Z"
+      />
+      <path
+        class="heart-full-loop cyan-flow"
+        pathLength="200"
+        d="M250,120 C250,120 200,30 120,30 C50,30 0,85 0,155 C0,245 90,315 250,450 C410,315 500,245 500,155 C500,85 450,30 380,30 C300,30 250,120 250,120 Z"
+      />
+      <path
+        class="heart-full-loop pink-flow"
+        pathLength="200"
+        d="M250,120 C250,120 200,30 120,30 C50,30 0,85 0,155 C0,245 90,315 250,450 C410,315 500,245 500,155 C500,85 450,30 380,30 C300,30 250,120 250,120 Z"
+      />
+    </svg>
+
+    <div class="drag-container">
+      <div class="spin-container">
+        <img src="./IMG_0343.WebP" alt="Ảnh 1" />
+        <img src="./IMG_1198.WebP" alt="Ảnh 2" />
+        <img src="./IMG_0983.WebP" alt="Ảnh 3" />
+        <img src="./WWBG2392.WebP" alt="Ảnh 4" />
+        <img src="./IMG_1335.WebP" alt="Ảnh 5" />
+        <img src="./IMG_5253.WebP" alt="Ảnh 6" />
+        <img src="./IMG_2071.WebP" alt="Ảnh 7" />
+        <img src="./IMG_1319.WebP" alt="Ảnh 8" />
+        <p>Love 2 years</p>
+      </div>
+      <div class="ground"></div>
+    </div>
+
+    <script>
+      const tickSound = new Audio("./tiengdongho.mp3");
+      let camera, renderer;
+
+      // ... (Giữ nguyên các hàm initThree, onWindowResize cũ của bạn)
+      function initThree() {
+        camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000,
+        );
+        renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function onWindowResize() {
+        if (!camera || !renderer) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.z = window.innerWidth < 834 ? 60 : 20;
+      }
+
+      initThree();
+      onWindowResize();
+      window.addEventListener("resize", onWindowResize, false);
+
+      // --- Logic Mới ---
+      const timerDisplay = document.getElementById("countdown-timer");
+
+      // 1. Sau 5 giây, hiện nút bấm
+      setTimeout(() => {
+        timerDisplay.style.display = "block";
+        timerDisplay.innerHTML = `<button id="start-btn">Nhấn để bắt đầu điều bất ngờ</button>`;
+
+        const startBtn = document.getElementById("start-btn");
+
+        // 2. Khi nhấn nút
+        startBtn.onclick = () => {
+          // Phát âm thanh
+          tickSound.play();
+
+          // Bắt đầu đếm ngược
+          let timeLeft = 10;
+          timerDisplay.innerText = "Waiting: " + timeLeft + "s";
+
+          const countdown = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = "Waiting: " + timeLeft + "s";
+
+            if (timeLeft <= 0) {
+              clearInterval(countdown);
+              tickSound.pause();
+              tickSound.currentTime = 0;
+              // Chuyển trang
+              window.location.href = "./universe.html";
+            }
+          }, 1000);
+        };
+      }, 5000); // Đợi 5 giây
+    </script>
+  </body>
+</html>

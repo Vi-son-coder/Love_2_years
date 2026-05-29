@@ -1,0 +1,343 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0b0115; /* Nền tím tối sâu thẳm */
+  overflow: hidden;
+  perspective: 1000px; /* Tạo chiều sâu không gian 3D */
+  position: relative;
+}
+
+/* --- HIỆU ỨNG TRÁI TIM NEON NỀN HOÀN HẢO --- */
+.neon-heart-svg {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  top: 15%;
+  left: calc(50% - 250px);
+  z-index: 0;
+  pointer-events: none;
+  animation: heartPulse 3s infinite ease-in-out;
+}
+
+.heart-path {
+  fill: none; /* KHÔNG ĐỔ MÀU RUỘT - bên trong rỗng hoàn toàn */
+  stroke: url(#heartGradient); /* Lấy màu gradient dải neon */
+  stroke-width: 6px; /* Độ dày viền trái tim */
+  stroke-linecap: round;
+  filter: url(#glow); /* Kích hoạt hiệu ứng tản sáng neon */
+}
+
+/* --- CẤU TRÚC VÒNG XOAY 3D --- */
+.drag-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  transform: rotateX(-14deg); /* Góc nghiêng nhìn xuống sàn 3D */
+  z-index: 1;
+}
+
+.spin-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  width: 140px; /* Chiều rộng khung ảnh */
+  height: 200px; /* Chiều cao khung ảnh */
+  /* Chờ ảnh lật mở xong mới bắt đầu xoay tròn */
+  animation: spinAuto 18s infinite linear;
+  animation-delay: 3.5s;
+}
+
+/* --- ĐỊNH DẠNG ẢNH VÀ HIỆU ỨNG ĐỔ BÓNG (REFLECT) --- */
+.spin-container img {
+  transform-style: preserve-3d;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+
+  /* Tạo hình phản chiếu phía dưới (bottom), cách ảnh chính 6px */
+  -webkit-box-reflect: bottom
+    6px -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      from(transparent),
+      color-stop(0.6, transparent),
+      to(rgba(255, 255, 255, 0.3))
+    );
+
+  /* Chạy hiệu ứng lật mở từ tâm ra lúc vừa load trang */
+  transition: transform 1s;
+  animation: deployImages 3s ease-out forwards;
+}
+
+/* Cấu hình góc xoay (--i) và thời gian trễ cho từng ảnh lật mở lần lượt */
+.spin-container img:nth-child(1) {
+  --i: 0deg;
+  animation-delay: 0s;
+}
+.spin-container img:nth-child(2) {
+  --i: 45deg;
+  animation-delay: 0.2s;
+}
+.spin-container img:nth-child(3) {
+  --i: 90deg;
+  animation-delay: 0.4s;
+}
+.spin-container img:nth-child(4) {
+  --i: 135deg;
+  animation-delay: 0.6s;
+}
+.spin-container img:nth-child(5) {
+  --i: 180deg;
+  animation-delay: 0.8s;
+}
+.spin-container img:nth-child(6) {
+  --i: 225deg;
+  animation-delay: 1s;
+}
+.spin-container img:nth-child(7) {
+  --i: 270deg;
+  animation-delay: 1.2s;
+}
+.spin-container img:nth-child(8) {
+  --i: 315deg;
+  animation-delay: 1.4s;
+}
+
+/* Kịch bản ban đầu: Ảnh gom ở tâm rồi tự lật theo góc và đẩy ra xa 260px */
+@keyframes deployImages {
+  0% {
+    transform: rotateY(0deg) translateZ(0px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotateY(var(--i)) translateZ(260px); /* Bán kính vòng xoay */
+  }
+}
+
+/* --- CHỮ Ở GIỮA TÂM VÒNG XOAY (ĐÃ SỬA CHỐNG XUỐNG DÒNG) --- */
+.spin-container p {
+  position: absolute;
+  top: 40%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap; /* ÉP CHỮ LUÔN TRÊN 1 DÒNG, TUYỆT ĐỐI KHÔNG WRAP */
+  color: #fff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow:
+    0 0 10px #00f0ff,
+    0 0 20px #00f0ff;
+}
+
+/* --- TRÁI TIM NEON: 60FPS SIÊU MƯỢT & LOANG SÁNG BẰNG GPU --- */
+.neon-heart-svg {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  top: 10%;
+  left: calc(50% - 300px);
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+
+  /* Bật chế độ tăng tốc phần cứng cho toàn bộ khung SVG */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.neon-heart-svg path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+/* Viền đen nền */
+.heart-base-black {
+  stroke: #000000;
+  stroke-width: 8px;
+  opacity: 1;
+}
+
+/* Thuộc tính chung cho hai thanh màu */
+.heart-full-loop {
+  stroke-width: 8px;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear; /* Chạy đều tuyến tính */
+  animation-duration: 2s;
+
+  /* Khóa cứng toán học: Thanh dài 70, khoảng cách 2 đầu luôn bằng 30 */
+  stroke-dasharray: 70 130;
+
+  /* [QUAN TRỌNG] Báo trước cho trình duyệt tối ưu hóa layer chuyển động, không load lại CPU */
+  will-change: stroke-dashoffset;
+  transform: translate3d(0, 0, 0);
+}
+
+.cyan-flow {
+  stroke: #00f0ff;
+  /* Chỉ gọi 1 cái filter duy nhất, nó sẽ tự xử lý 4 lớp loang bên trong */
+  filter: url(#neonGlowMegaWide);
+  animation-name: runFullLoopCyan;
+  /* Dòng này cực quan trọng: ép điện thoại bật tăng tốc phần cứng */
+  will-change: filter;
+}
+
+.pink-flow {
+  stroke: #ff007f;
+  filter: url(#neonGlowMegaWide);
+  animation-name: runFullLoopPink;
+  will-change: filter;
+}
+
+#countdown-timer {
+  position: fixed;
+  top: 18% !important; /* Tăng/giảm số này để căn lên/xuống cho khớp vào chỗ lõm */
+  left: 50%;
+  transform: translateX(-50%); /* Bí quyết để nằm chính giữa màn hình */
+
+  color: #ff00ff;
+  font-family: "Arial", sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow:
+    0 0 10px #ff00ff,
+    0 0 20px #ff00ff;
+  z-index: 9999;
+
+  display: none; /* Giữ logic cũ: ẩn ban đầu */
+  pointer-events: none; /* Tránh việc chữ chặn vào thao tác chuột của bạn */
+}
+
+#start-btn {
+  /* Phong cách Neon Cyberpunk */
+  background: rgba(0, 240, 255, 0.1); /* Nền mờ, hơi xanh */
+  color: #00f0ff; /* Màu chữ Neon Cyan */
+  border: 2px solid #00f0ff; /* Viền Cyan */
+  padding: 18px 40px;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-shadow: 0 0 8px #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  backdrop-filter: blur(5px); /* Làm mờ nền phía sau */
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+/* Hiệu ứng khi di chuột vào (Hover) */
+#start-btn:hover {
+  background: #00f0ff;
+  color: #0b0115; /* Màu nền trang web */
+  box-shadow:
+    0 0 20px #00f0ff,
+    0 0 40px #00f0ff;
+  transform: scale(1.05); /* Phóng to nhẹ */
+}
+
+/* --- KỊCH BẢN CHẠY TUẦN HOÀN 1 VÒNG TRÁI TIM --- */
+@keyframes runFullLoopCyan {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -200; /* Chạy chuẩn xác hết 1 vòng */
+  }
+}
+
+@keyframes runFullLoopPink {
+  from {
+    stroke-dashoffset: -100; /* Lệch pha nửa vòng để giữ khoảng cách đều */
+  }
+  to {
+    stroke-dashoffset: -300;
+  }
+}
+
+/* Kịch bản xoay tròn 360 độ liên tục */
+@keyframes spinAuto {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+img {
+  -webkit-box-reflect: below 8px
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
+}
+
+/* ========================================================= */
+/* --- PHẦN BỔ SUNG RESPONSIVE ĐỂ VỪA KHÍT MÀN HÌNH ĐIỆN THOẠI --- */
+/* ========================================================= */
+@media screen and (max-width: 768px) {
+  /* Căn thẳng trái tim tuyệt đối vào chính giữa màn hình (đồng tâm 100% với chữ/ảnh) */
+  .neon-heart-svg {
+    width: 440px !important;
+    height: 440px !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  /* Thu nhỏ vòng xoay ảnh bằng scale() để không làm hỏng hiệu ứng 3D translateZ */
+  .drag-container {
+    transform: rotateX(-14deg) scale(0.53) !important;
+  }
+}
+
+/* Tối ưu riêng cho các điện thoại nhỏ hơn (Ví dụ: iPhone SE) */
+@media screen and (max-width: 380px) {
+  .neon-heart-svg {
+    width: 380px !important;
+    height: 380px !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .drag-container {
+    transform: rotateX(-14deg) scale(0.46) !important;
+  }
+}
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+body {
+  animation: scaleIn 1s ease-out forwards;
+}
