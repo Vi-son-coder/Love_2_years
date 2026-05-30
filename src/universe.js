@@ -191,7 +191,7 @@ function animate() {
           p.position.lerp(p.userData.target, 0.08);
           p.lookAt(camera.position);
         });
-        if (camera.position.z > 25) camera.position.z -= 0.4;
+        if (camera.position.z > 22) camera.position.z -= 0.4;
       }
     }
   }
