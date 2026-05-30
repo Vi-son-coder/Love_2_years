@@ -19,7 +19,7 @@ const music = document.getElementById("bg-music");
 const overlay = document.getElementById("overlay");
 let isStarted = false;
 
-// 2. Sự kiện click (Dùng addEventListener thay vì onclick HTML)
+// 2. Sự kiện click
 overlay.addEventListener("click", () => {
   if (isStarted) return;
   isStarted = true;
@@ -42,7 +42,12 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000,
 );
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+// Tối ưu 1: Yêu cầu trình duyệt dồn sức mạnh GPU để chạy mượt
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true,
+  powerPreference: "high-performance",
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -91,49 +96,73 @@ const myTexts = [
 ];
 const emojis = ["❤️", "🌸", "🌹", "💖"];
 
+// Tối ưu 2: Giảm kích thước canvas ẩn để tiết kiệm RAM
 function createTextTexture(text) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 128;
   const ctx = canvas.getContext("2d");
-  ctx.font = "bold 100px Arial";
+  ctx.font = "bold 50px Arial";
   ctx.fillStyle = "#ff69b4";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, 512, 128);
+  ctx.fillText(text, 256, 64);
   return new THREE.CanvasTexture(canvas);
 }
 
+// Tối ưu 3: TẠO SẴN MATERIAL VÀ GEOMETRY Ở NGOÀI VÒNG LẶP (Chìa khóa chống lag)
+const textMaterials = myTexts.map(
+  (text) =>
+    new THREE.MeshBasicMaterial({
+      map: createTextTexture(text),
+      transparent: true,
+      opacity: 0.8,
+      alphaTest: 0.1,
+      side: THREE.DoubleSide,
+    }),
+);
+
+const emojiMaterials = emojis.map(
+  (emoji) =>
+    new THREE.MeshBasicMaterial({
+      map: createTextTexture(emoji),
+      transparent: true,
+      opacity: 0.8,
+      alphaTest: 0.1,
+      side: THREE.DoubleSide,
+    }),
+);
+
+const imgMaterials = textures.map(
+  (tex) =>
+    new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      opacity: 0.8,
+      alphaTest: 0.1,
+      side: THREE.DoubleSide,
+    }),
+);
+
+const textGeo = new THREE.PlaneGeometry(4, 2);
+const imgGeo = new THREE.PlaneGeometry(1.2, 1.2);
+const emojiGeo = new THREE.PlaneGeometry(3.5, 1.5);
+
 for (let i = 0; i < count; i++) {
   let material, geometry;
+
+  // Chỉ lấy Material đã tạo sẵn ra dùng, không tạo mới
   if (i < 10) {
-    material = new THREE.MeshBasicMaterial({
-      map: createTextTexture(myTexts[i % myTexts.length]),
-      transparent: true,
-      opacity: 0.8,
-      alphaTest: 0.1,
-      side: THREE.DoubleSide,
-    });
-    geometry = new THREE.PlaneGeometry(4, 2);
+    material = textMaterials[i % textMaterials.length];
+    geometry = textGeo;
   } else if (i < 300) {
-    material = new THREE.MeshBasicMaterial({
-      map: textures[i % textures.length],
-      transparent: true,
-      opacity: 0.8,
-      alphaTest: 0.1,
-      side: THREE.DoubleSide,
-    });
-    geometry = new THREE.PlaneGeometry(1.2, 1.2);
+    material = imgMaterials[i % imgMaterials.length];
+    geometry = imgGeo;
   } else {
-    material = new THREE.MeshBasicMaterial({
-      map: createTextTexture(emojis[i % emojis.length]),
-      transparent: true,
-      opacity: 0.8,
-      alphaTest: 0.1,
-      side: THREE.DoubleSide,
-    });
-    geometry = new THREE.PlaneGeometry(3.5, 1.5);
+    material = emojiMaterials[i % emojiMaterials.length];
+    geometry = emojiGeo;
   }
+
   const mesh = new THREE.Mesh(geometry, material);
   const r = maxRadius * Math.pow(Math.random(), 1 / 3);
   const theta = Math.random() * Math.PI * 2;
@@ -158,7 +187,8 @@ function animate() {
     if (isLoaded) {
       if (Date.now() - startTime > 300) {
         particles.forEach((p) => {
-          p.position.lerp(p.userData.target, 0.05);
+          // Tối ưu 4: Đổi 0.05 thành 0.08 để hạt bung ra dứt khoát hơn
+          p.position.lerp(p.userData.target, 0.08);
           p.lookAt(camera.position);
         });
         if (camera.position.z > 25) camera.position.z -= 0.4;
