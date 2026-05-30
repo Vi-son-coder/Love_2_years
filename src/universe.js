@@ -14,6 +14,9 @@ import img9 from "./assets/RYLE4532.WebP";
 
 export const myImages = [img1, img2, img3, img4, img5, img6, img7, img8, img9];
 
+// Nhận diện thiết bị di động
+const isMobile = window.innerWidth < 768;
+
 // 1. Setup ban đầu
 const music = document.getElementById("bg-music");
 const overlay = document.getElementById("overlay");
@@ -42,23 +45,32 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000,
 );
-// Tối ưu 1: Yêu cầu trình duyệt dồn sức mạnh GPU để chạy mượt
+
+// SIÊU TỐI ƯU 1: Tắt khử răng cưa trên mobile cho nhẹ, ép dùng high-performance
 const renderer = new THREE.WebGLRenderer({
-  antialias: true,
+  antialias: !isMobile, 
   alpha: true,
   powerPreference: "high-performance",
 });
+
+// SIÊU TỐI ƯU 2: Giới hạn Pixel Ratio để chống tràn VRAM trên iPhone/Android màn hình nét
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // Thêm độ mượt khi xoay
+controls.dampingFactor = 0.05;
 camera.position.z = 40;
 
 // Các thành phần phụ trợ
 const starGeometry = new THREE.BufferGeometry();
 const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
 const starVertices = [];
-for (let i = 0; i < 2000; i++) {
+// Giảm số lượng sao trên điện thoại
+const starCount = isMobile ? 800 : 2000; 
+
+for (let i = 0; i < starCount; i++) {
   starVertices.push(
     THREE.MathUtils.randFloatSpread(200),
     THREE.MathUtils.randFloatSpread(200),
@@ -86,7 +98,8 @@ const textures = myImages.map((url) => loader.load(url));
 
 // Tạo các hạt
 const particles = [];
-const count = 400;
+// SIÊU TỐI ƯU 3: Cắt giảm số lượng vật thể trên điện thoại để máy không bị treo
+const count = isMobile ? 150 : 400; 
 const maxRadius = 20;
 const myTexts = [
   "Anh yêu em",
@@ -96,7 +109,7 @@ const myTexts = [
 ];
 const emojis = ["❤️", "🌸", "🌹", "💖"];
 
-// Tối ưu 2: Giảm kích thước canvas ẩn để tiết kiệm RAM
+// Giảm kích thước canvas ẩn để tiết kiệm RAM
 function createTextTexture(text) {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
@@ -110,13 +123,13 @@ function createTextTexture(text) {
   return new THREE.CanvasTexture(canvas);
 }
 
-// Tối ưu 3: TẠO SẴN MATERIAL VÀ GEOMETRY Ở NGOÀI VÒNG LẶP (Chìa khóa chống lag)
+// TẠO SẴN MATERIAL VÀ GEOMETRY
 const textMaterials = myTexts.map(
   (text) =>
     new THREE.MeshBasicMaterial({
       map: createTextTexture(text),
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       alphaTest: 0.1,
       side: THREE.DoubleSide,
     }),
@@ -127,7 +140,7 @@ const emojiMaterials = emojis.map(
     new THREE.MeshBasicMaterial({
       map: createTextTexture(emoji),
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       alphaTest: 0.1,
       side: THREE.DoubleSide,
     }),
@@ -138,24 +151,25 @@ const imgMaterials = textures.map(
     new THREE.MeshBasicMaterial({
       map: tex,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       alphaTest: 0.1,
       side: THREE.DoubleSide,
     }),
 );
 
 const textGeo = new THREE.PlaneGeometry(4, 2);
-const imgGeo = new THREE.PlaneGeometry(1.2, 1.2);
+const imgGeo = new THREE.PlaneGeometry(1.5, 1.5);
 const emojiGeo = new THREE.PlaneGeometry(3.5, 1.5);
+
+const imgCountLimit = isMobile ? 100 : 300;
 
 for (let i = 0; i < count; i++) {
   let material, geometry;
 
-  // Chỉ lấy Material đã tạo sẵn ra dùng, không tạo mới
   if (i < 10) {
     material = textMaterials[i % textMaterials.length];
     geometry = textGeo;
-  } else if (i < 300) {
+  } else if (i < imgCountLimit) {
     material = imgMaterials[i % imgMaterials.length];
     geometry = imgGeo;
   } else {
@@ -173,6 +187,10 @@ for (let i = 0; i < count; i++) {
     r * Math.cos(phi),
   );
   mesh.position.set(0, 0, 0);
+  
+  // Biến cờ để theo dõi hạt đã đến đích chưa
+  mesh.userData.isSettled = false; 
+  
   group.add(mesh);
   particles.push(mesh);
 }
@@ -184,14 +202,25 @@ function animate() {
   if (isStarted) {
     group.rotation.y += 0.0008;
     stars.rotation.y -= 0.0005;
+    
     if (isLoaded) {
       if (Date.now() - startTime > 300) {
         particles.forEach((p) => {
-          // Tối ưu 4: Đổi 0.05 thành 0.08 để hạt bung ra dứt khoát hơn
-          p.position.lerp(p.userData.target, 0.08);
-          p.lookAt(camera.position);
+          // SIÊU TỐI ƯU 4: Chỉ lerp nếu hạt chưa đến đích. Tránh CPU phải tính toán vô ích mỗi frame.
+          if (!p.userData.isSettled) {
+            p.position.lerp(p.userData.target, 0.08);
+            if (p.position.distanceToSquared(p.userData.target) < 0.01) {
+              p.userData.isSettled = true;
+            }
+          }
+          
+          // SIÊU TỐI ƯU 5: Chép thẳng góc quay của Camera sang hạt thay vì dùng hàm p.lookAt() cực nặng
+          p.quaternion.copy(camera.quaternion);
         });
-        if (camera.position.z > 25) camera.position.z -= 0.4;
+        
+        if (camera.position.z > (isMobile ? 35 : 25)) {
+            camera.position.z -= 0.4;
+        }
       }
     }
   }
@@ -201,7 +230,9 @@ function animate() {
 animate();
 
 window.addEventListener("resize", () => {
+  const isNowMobile = window.innerWidth < 768;
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isNowMobile ? 1.5 : 2));
 });
