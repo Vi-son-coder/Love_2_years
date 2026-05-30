@@ -165,6 +165,7 @@
         color: #ff4d6d;
         cursor: pointer;
         user-select: none;
+        -webkit-tap-highlight-color: transparent; /* Chống chớp đen trên điện thoại */
       }
 
       .btn-play {
@@ -461,13 +462,15 @@
           <span id="curr-time">0:00</span>
           <span id="total-time">0:00</span>
         </div>
+        
         <div class="controls">
-          <div class="btn-ctrl" onclick="prevTrack()">⏮</div>
+          <div class="btn-ctrl" onclick="prevTrack()">⏮&#xFE0E;</div>
           <div class="btn-play" id="play-pause-btn" onclick="togglePlay()">
-            ▶
+            ▶&#xFE0E;
           </div>
-          <div class="btn-ctrl" onclick="nextTrack()">⏭</div>
+          <div class="btn-ctrl" onclick="nextTrack()">⏭&#xFE0E;</div>
         </div>
+
         <div class="track-list" id="track-list">
           <div
             class="track-item"
@@ -643,7 +646,8 @@
         document.getElementById("music-modal").style.display = "none";
         document.body.style.overflow = "";
         audio.pause();
-        playBtn.innerText = "▶";
+        // Cập nhật ở đây: innerHTML và thêm &#xFE0E;
+        playBtn.innerHTML = "▶&#xFE0E;";
       }
 
       function selectTrack(index) {
@@ -667,7 +671,8 @@
         item.style.background = "rgba(255, 77, 109, 0.25)";
 
         audio.play();
-        playBtn.innerText = "⏸";
+        // Cập nhật ở đây: innerHTML và thêm &#xFE0E;
+        playBtn.innerHTML = "⏸&#xFE0E;";
       }
 
       function togglePlay() {
@@ -678,10 +683,12 @@
 
         if (audio.paused) {
           audio.play();
-          playBtn.innerText = "⏸";
+          // Cập nhật ở đây
+          playBtn.innerHTML = "⏸&#xFE0E;";
         } else {
           audio.pause();
-          playBtn.innerText = "▶";
+          // Cập nhật ở đây
+          playBtn.innerHTML = "▶&#xFE0E;";
         }
       }
 
