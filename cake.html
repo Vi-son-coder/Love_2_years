@@ -369,8 +369,8 @@ html lang="en">
     });
   </script>
   <script>
-    const clickSound = new Audio("./mouseclick.mp3");
-    const cutSound = new Audio("./quick_vegetable_slice_3.mp3");
+    const clickSound = new Audio("/mouseclick.mp3");
+    const cutSound = new Audio("/quick_vegetable_slice_3.mp3");
     // --- 1. SETUP UI (Nút + Note) ---
     const cutBtn = document.createElement("button");
     cutBtn.innerText = "Cắt Bánh!";
@@ -529,7 +529,7 @@ html lang="en">
           onUpdate: () => controls.update(),
         });
         setTimeout(() => {
-          window.location.href = "./album.html";
+          window.location.href = "/album.html";
         }, 1200);
       }
     };

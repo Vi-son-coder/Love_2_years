@@ -50,21 +50,21 @@
 
     <div class="drag-container">
       <div class="spin-container">
-        <img src="./IMG_0343.WebP" alt="Ảnh 1" />
-        <img src="./IMG_1198.WebP" alt="Ảnh 2" />
-        <img src="./IMG_0983.WebP" alt="Ảnh 3" />
-        <img src="./WWBG2392.WebP" alt="Ảnh 4" />
-        <img src="./IMG_1335.WebP" alt="Ảnh 5" />
-        <img src="./IMG_5253.WebP" alt="Ảnh 6" />
-        <img src="./IMG_2071.WebP" alt="Ảnh 7" />
-        <img src="./IMG_1319.WebP" alt="Ảnh 8" />
+        <img src="/IMG_0343.WebP" alt="Ảnh 1" />
+        <img src="/IMG_1198.WebP" alt="Ảnh 2" />
+        <img src="/IMG_0983.WebP" alt="Ảnh 3" />
+        <img src="/WWBG2392.WebP" alt="Ảnh 4" />
+        <img src="/IMG_1335.WebP" alt="Ảnh 5" />
+        <img src="/IMG_5253.WebP" alt="Ảnh 6" />
+        <img src="/IMG_2071.WebP" alt="Ảnh 7" />
+        <img src="/IMG_1319.WebP" alt="Ảnh 8" />
         <p>Love 2 years</p>
       </div>
       <div class="ground"></div>
     </div>
 
     <script>
-      const tickSound = new Audio("./tiengdongho.mp3");
+      const tickSound = new Audio("/tiengdongho.mp3");
       let camera, renderer;
 
       // ... (Giữ nguyên các hàm initThree, onWindowResize cũ của bạn)
@@ -119,7 +119,7 @@
               tickSound.pause();
               tickSound.currentTime = 0;
               // Chuyển trang
-              window.location.href = "./universe.html";
+              window.location.href = "/universe.html";
             }
           }, 1000);
         };
